@@ -5,7 +5,7 @@ import numpy as np
 
 
 def get_data(heart_disease_data_directory, file_names):
-    col_names = get_col_names(heart_disease_data_directory, "col_names.txt")
+    col_names = get_col_names("data/", "col_names.txt")
     data_list = []
     for file_name in file_names:
         raw_data = read_raw_data(heart_disease_data_directory, file_name)
