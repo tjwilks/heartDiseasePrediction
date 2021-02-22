@@ -9,12 +9,13 @@ def preprocess_data(data):
     data = drop_unessersary_cols(data)
     data = drop_cols_with_x_prop_missing_values(data, 0.2)
     data = order_y_output(data)
+    data = transform_y_output(data)
     cat_data = impute_cat_missing_values(data)
     cat_data = one_hot_encode_cat_variables(cat_data)
     cont_data = impute_cont_missing_values(data)
     cont_data = normalise_continuous_variables(cont_data)
-    y_data = data["y"]
-    X_data = pd.concat([cat_data, cont_data], axis=1)
+    y_data = data["y"].to_numpy()
+    X_data = pd.concat([cat_data, cont_data], axis=1).to_numpy()
     return X_data, y_data
 
 
@@ -64,6 +65,10 @@ def order_y_output(data):
     return data
 
 
+def transform_y_output(data):
+    data["y"] = np.where(data["y"] == "0", 0, 1)
+    return data
+
 def impute_cat_missing_values(cat_data):
     cat_data = cat_data.select_dtypes("string")
     cat_data = cat_data.replace({pd.NA: np.nan})
@@ -84,7 +89,6 @@ def impute_cont_missing_values(cont_data):
 
 
 def one_hot_encode_cat_variables(cat_data):
-    cat_data = cat_data.drop("y", axis=1)
     one_hot_encoder = OneHotEncoder()
     cat_data = one_hot_encoder.fit_transform(cat_data)
     cat_data = cat_data.toarray()
