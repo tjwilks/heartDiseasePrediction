@@ -1,5 +1,7 @@
 import configparser
 from src.utils import read_input_data, preprocess_data
+from src.modelling import random_forrest_modelling
+
 
 def main():
     config = configparser.ConfigParser()
@@ -11,6 +13,9 @@ def main():
          "hungarian.data"]
     )
     X_data, y_data = preprocess_data.preprocess_data(data)
+    model = random_forrest_modelling.train_random_forrests(X_data, y_data)
+
 
 if __name__ == "__main__":
     main()
+
