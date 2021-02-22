@@ -1,6 +1,7 @@
 import os
 import pandas as pd
-
+import re
+import numpy as np
 
 def get_data(heart_disease_data_directory, file_names):
     col_names = get_col_names(heart_disease_data_directory, "col_names.txt")
@@ -12,6 +13,8 @@ def get_data(heart_disease_data_directory, file_names):
         data["data_origin"] = file_name.replace(".data", "")
         data_list.append(data)
     all_data = pd.concat(data_list, axis=0)
+    all_data = all_data.mask(data == "-9", np.nan)
+
     return all_data
 
 
@@ -19,7 +22,7 @@ def get_col_names(heart_disease_data_directory,col_names_file_name):
     file_path = os.path.join(heart_disease_data_directory, col_names_file_name)
     with open(file_path, "rb") as file:
         lines = file.readlines()
-    col_names = [str(line)[10:-5] for line in lines]
+    col_names = [str(line)[7:-5] for line in lines]
     return col_names
 
 
@@ -35,7 +38,8 @@ def process_raw_data(raw_data):
     raw_data = str(raw_data)
     raw_data = raw_data.replace("b'", "")
     raw_data = raw_data.replace(". ", "")
-    raw_data = raw_data.replace("-9-9", "-9 -9")
+    raw_data = re.sub("([^ ])(-9)", r'\1 \2', raw_data)
+    raw_data = raw_data.replace("[^ ]-9", " -9")
     raw_data = raw_data.replace("\\n", " ")
     raw_data = raw_data.replace("'", "")
     raw_data = raw_data.split("name ")
@@ -47,6 +51,7 @@ def generate_data_frame(raw_data, col_names):
     for row in raw_data:
         row = row.rstrip(" ")
         row = row.split(" ")
+        row = list(filter(lambda a: a != "", row))
         rows.append(row)
     data = pd.DataFrame(rows, columns=col_names)
     return data
