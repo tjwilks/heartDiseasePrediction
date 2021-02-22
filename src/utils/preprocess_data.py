@@ -69,6 +69,7 @@ def transform_y_output(data):
     data["y"] = np.where(data["y"] == "0", 0, 1)
     return data
 
+
 def impute_cat_missing_values(cat_data):
     cat_data = cat_data.select_dtypes("string")
     cat_data = cat_data.replace({pd.NA: np.nan})

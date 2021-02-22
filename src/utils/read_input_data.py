@@ -3,6 +3,7 @@ import pandas as pd
 import re
 import numpy as np
 
+
 def get_data(heart_disease_data_directory, file_names):
     col_names = get_col_names(heart_disease_data_directory, "col_names.txt")
     data_list = []
@@ -14,7 +15,6 @@ def get_data(heart_disease_data_directory, file_names):
         data_list.append(data)
     all_data = pd.concat(data_list, axis=0)
     all_data = all_data.mask(data == "-9", np.nan)
-
     return all_data
 
 
