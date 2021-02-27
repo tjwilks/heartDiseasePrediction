@@ -10,6 +10,7 @@ def train_random_forrests(X_data, y_data):
     cross_validation_score = np.mean(cross_val_score(baseline_rf_model, X_data, y_data, cv=10))
     print(f"Out of bag score: {str(out_of_bag_score)}")
     print(f"cross validation score: {str(cross_validation_score)}")
+    return baseline_rf_model
 
 
 def random_forrest_grid_search(X_data, y_data):
@@ -27,3 +28,14 @@ def grid_search_cv_rf_results(grid_search_cv_rf):
     grid_search_cv_results = grid_search_cv_rf.cv_results_
     for scores, parameters in zip(grid_search_cv_results["mean_test_score"], grid_search_cv_results["params"]):
         print(scores, parameters)
+
+
+def random_forrest_feature_importances(model, features):
+    feature_importances = model.feature_importances_
+    importance_rank = 1
+    feature_importance_dict = {}
+    for feature_importance, feature in sorted(zip(feature_importances, features), reverse=True):
+        print(f"{str(importance_rank)}: {feature[2:]}: {np.round(float(feature_importance), 3)}")
+        feature_importance_dict[feature] = (importance_rank, feature_importance)
+        importance_rank += 1
+    return feature_importance_dict

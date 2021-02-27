@@ -7,16 +7,18 @@ from sklearn.preprocessing import OneHotEncoder
 def preprocess_data(data):
     data = assign_catagorical_col_types(data)
     data = drop_unessersary_cols(data)
-    data = drop_cols_with_x_prop_missing_values(data, 0.2)
+    data = drop_cols_with_x_prop_missing_values(data, 0.01)
     data = order_y_output(data)
     data = transform_y_output(data)
     cat_data = impute_cat_missing_values(data)
     cat_data = one_hot_encode_cat_variables(cat_data)
     cont_data = impute_cont_missing_values(data)
     cont_data = normalise_continuous_variables(cont_data)
+    features_df = pd.concat([cat_data, cont_data], axis=1)
+    features = features_df.columns
+    X_data = features_df.to_numpy()
     y_data = data["y"].to_numpy()
-    X_data = pd.concat([cat_data, cont_data], axis=1).to_numpy()
-    return X_data, y_data
+    return features, X_data, y_data
 
 
 def assign_catagorical_col_types(data):
@@ -37,7 +39,7 @@ def assign_catagorical_col_types(data):
 
 def drop_unessersary_cols(data):
     # judged as unessersary by examination of column names
-    col_to_drop_idxs = [0, 1, 19, 20, 21, 22, 27, 35, 44, 45, 51, 52, 53, 54, 55, 56, 68, 69, 70, 71, 72, 73, 74]
+    col_to_drop_idxs = [0, 1]
     cols_to_drop = data.columns[col_to_drop_idxs]
     data = data.drop(cols_to_drop, axis=1)
     return data
@@ -91,7 +93,8 @@ def impute_cont_missing_values(cont_data):
 
 def one_hot_encode_cat_variables(cat_data):
     one_hot_encoder = OneHotEncoder()
-    cat_data = one_hot_encoder.fit_transform(cat_data)
-    cat_data = cat_data.toarray()
-    cat_data = pd.DataFrame(cat_data)
+    cat_data_one_hot = one_hot_encoder.fit_transform(cat_data)
+    one_hot_features = one_hot_encoder.get_feature_names(list(cat_data.columns))
+    cat_data_one_hot = cat_data_one_hot.toarray()
+    cat_data = pd.DataFrame(cat_data_one_hot, columns=one_hot_features)
     return cat_data
