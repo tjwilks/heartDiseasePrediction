@@ -18,8 +18,12 @@ def random_forrest_grid_search(X_data, y_data):
         "max_features": [3, 4, 5, 6, 7]
     }
     forrest_classifier = RandomForestClassifier(n_estimators=200)
-    grid_search_cv = GridSearchCV(forrest_classifier, param_grid, cv=10)
-    grid_search_cv.fit(X_data, y_data)
-    grid_search_cv_results = grid_search_cv.cv_results_
+    grid_search_cv_rf = GridSearchCV(forrest_classifier, param_grid, cv=10)
+    grid_search_cv_rf.fit(X_data, y_data)
+    return grid_search_cv_rf
+
+
+def grid_search_cv_rf_results(grid_search_cv_rf):
+    grid_search_cv_results = grid_search_cv_rf.cv_results_
     for scores, parameters in zip(grid_search_cv_results["mean_test_score"], grid_search_cv_results["params"]):
         print(scores, parameters)

@@ -14,7 +14,8 @@ def main():
     )
     X_data, y_data = preprocess_data.preprocess_data(data)
     model = random_forrest_modelling.train_random_forrests(X_data, y_data)
-    random_forrest_modelling.random_forrest_grid_search(X_data, y_data)
+    grid_search_cv_rf = random_forrest_modelling.random_forrest_grid_search(X_data, y_data)
+    random_forrest_modelling.grid_search_cv_rf_results(grid_search_cv_rf)
 
 if __name__ == "__main__":
     main()
