@@ -1,7 +1,7 @@
 from sklearn.model_selection import cross_val_score, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 import numpy as np
-
+import pandas as pd
 
 def train_random_forrests(X_data, y_data):
     baseline_rf_model = RandomForestClassifier(n_estimators=200, max_features=5, max_leaf_nodes=25, n_jobs=-1, oob_score=True)
@@ -39,3 +39,15 @@ def random_forrest_feature_importances(model, features):
         feature_importance_dict[feature] = (importance_rank, feature_importance)
         importance_rank += 1
     return feature_importance_dict
+
+
+def feature_importance_feature_selection(feature_importance_dict, rank_filter):
+    selected_features = [feature for feature, rank_score in feature_importance_dict.items() if rank_score[0]<=rank_filter]
+    return selected_features
+
+
+def filter_X_data_to_selected_features(selected_features, features, X_data):
+    X_data_df = pd.DataFrame(X_data, columns=features)
+    X_data_df = X_data_df.loc[:, selected_features]
+    X_data = X_data_df.to_numpy()
+    return X_data
