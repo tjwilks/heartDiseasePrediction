@@ -9,7 +9,7 @@ Data source and information: https://archive.ics.uci.edu/ml/datasets/Heart+Disea
 3) Run "python setup.py develop" to install package
 4) Download data from https://archive.ics.uci.edu/ml/datasets/Heart+Disease
 5) Add location of directory where downloaded data is stored
-5) Run "src/main.py" to read data, preprocess and generate results of baseline random forests model
+6) Run "src/main.py" to read data, preprocess and generate results of baseline random forests model
 
 ### Package notes 22-02-21
 Early development version of package including data pipeline, preprocessing and baseline random forest model assesment.
