@@ -7,23 +7,27 @@ Data source and information: https://archive.ics.uci.edu/ml/datasets/Heart+Disea
 1) Create environment with requirements.txt
 2) If previously installed, run "pip uninstall heartDiseasePrediction" and then "python setup.py clean"
 3) Run "python setup.py develop" to install package
-4) Run "src/main.py" to read data, preprocess and generate results of baseline random forests model
+4) Download data from https://archive.ics.uci.edu/ml/datasets/Heart+Disease
+5) Run "src/main.py" to read data, preprocess and generate results of baseline random forests model
 
 ### Package notes 22-02-21
 Early development version of package including data pipeline, preprocessing and baseline random forest model assesment.
+
+### Package notes 01-03-21
+Early development version of package updated to include:
+1) Random forrest hyper-parameter tuning via grid-search
+2) Variable importance scoring and feature selection
+3) Beginning of transition to object-oriented design, starting with preprocessing
 
 ### Package development requirements
 1) Documentation
 2) Testing
 3) Parsing of corrupted cleveland data
-
+4) Completion of transition to object-oriented design
 ### Future experiments
-1) Random forest hyper-parameter optimisation via cross_validation
-2) Variable importance scoring
-3) Boosted decision trees comparison to random forrest
-4) Feature engineering (pack-years feature from smoking data)
-5) Feature selection (Best subset selection, recursive elimination)
-6) Bayesian optimisation hyper-parameter tuning
+1) Boosted decision trees comparison to random forrest
+2) Feature engineering (pack-years feature from smoking data)
+3) Bayesian optimisation hyper-parameter tuning
 
 
 
