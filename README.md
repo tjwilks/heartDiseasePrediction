@@ -8,7 +8,7 @@ Data source and information: https://archive.ics.uci.edu/ml/datasets/Heart+Disea
 2) If previously installed, run "pip uninstall heartDiseasePrediction" and then "python setup.py clean"
 3) Run "python setup.py develop" to install package
 4) Download data from https://archive.ics.uci.edu/ml/datasets/Heart+Disease
-5) Add location of directory where downloaded data is stored
+5) Add location of directory where downloaded data is stored to config.yml
 6) Run "src/main.py" to read data, preprocess and generate results of baseline random forests model
 
 ### Package notes 22-02-21
