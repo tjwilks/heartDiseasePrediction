@@ -71,7 +71,6 @@ class CategoricalVariablePreprocessor:
 
     def impute_cat_missing_values(self):
         self.cat_data = self.data.select_dtypes("string")
-        self.cat_data = self.cat_data.replace({pd.NA: np.nan})
         col_names = self.cat_data.columns
         most_frequent_imputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
         self.cat_data = most_frequent_imputer.fit_transform(self.cat_data.to_numpy())
@@ -136,6 +135,7 @@ class DataPreprocessor(FeatureSelector,
 
     def preprocess_data(self):
         # col removal
+        self.label_missing_values()
         self.drop_unessersary_cols()
         self.drop_cols_with_x_prop_missing_values()
         # col assignment
@@ -152,3 +152,7 @@ class DataPreprocessor(FeatureSelector,
         # # input data formatting
         self.concatenate_cat_cont_data()
         self.prepare_data_for_modelling()
+
+    def label_missing_values(self):
+        self.data = self.data.replace({pd.NA: np.nan, '-9': np.nan})
+
