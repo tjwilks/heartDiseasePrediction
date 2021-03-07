@@ -18,6 +18,7 @@ class FeatureSelector:
         return self.data
 
     def drop_cols_with_x_prop_missing_values(self):
+        self.data = self.data.replace({pd.NA: np.nan})
         col_na_proportion = self.data.isnull().sum() / len(self.data)
         col_na_proportion = col_na_proportion[col_na_proportion < self.missing_value_filter]
         cols_to_keep = col_na_proportion.index
@@ -72,6 +73,7 @@ class CategoricalVariablePreprocessor:
     def impute_cat_missing_values(self):
         self.cat_data = self.data.select_dtypes("string")
         col_names = self.cat_data.columns
+        self.cat_data = self.cat_data.replace({pd.NA: np.nan})
         most_frequent_imputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
         self.cat_data = most_frequent_imputer.fit_transform(self.cat_data.to_numpy())
         self.cat_data = pd.DataFrame(self.cat_data, columns=col_names)
@@ -92,6 +94,7 @@ class ContinuousVariablePreprocessor:
 
     def impute_cont_missing_values(self):
         self.cont_data = self.data.select_dtypes("float")
+        self.cont_data = self.cont_data.replace({pd.NA: np.nan})
         col_names = self.cont_data.columns
         median_imputer = SimpleImputer(missing_values=np.nan, strategy='median')
         self.cont_data = median_imputer.fit_transform(self.cont_data)
@@ -134,8 +137,9 @@ class DataPreprocessor(FeatureSelector,
         self.missing_value_filter = missing_value_filter
 
     def preprocess_data(self):
-        # col removal
+
         self.label_missing_values()
+        # col removal
         self.drop_unessersary_cols()
         self.drop_cols_with_x_prop_missing_values()
         # col assignment
@@ -149,10 +153,13 @@ class DataPreprocessor(FeatureSelector,
         # continuous variable preprocessing
         self.normalise_continuous_variables()
         self.impute_cont_missing_values()
-        # # input data formatting
+        # input data formatting
         self.concatenate_cat_cont_data()
         self.prepare_data_for_modelling()
 
+
     def label_missing_values(self):
-        self.data = self.data.replace({pd.NA: np.nan, '-9': np.nan})
+        col_types = self.data.dtypes
+        self.data = self.data.replace({'-9': np.nan, -9: np.nan})
+        self.data = self.data.astype(col_types)
 

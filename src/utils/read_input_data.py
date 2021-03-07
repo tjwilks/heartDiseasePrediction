@@ -14,7 +14,6 @@ def get_data(heart_disease_data_directory, file_names):
         data["data_origin"] = file_name.replace(".data", "")
         data_list.append(data)
     all_data = pd.concat(data_list, axis=0)
-    all_data = all_data.mask(data == "-9", np.nan)
     return all_data
 
 
