@@ -39,18 +39,6 @@ class ColAssignor:
         self.data = self.data.drop(y_col_name, axis =1)
 
     def assign_col_types(self):
-        continuous_col_type_idxs = [2, 9, 11, 13, 14, 15, 28, 29, 30, 31,
-                                    32, 33, 34, 35, 36, 39, 41, 42, 43, 44]
-        col_names = self.data.columns
-        i = 0
-        dtypes_dict = {}
-        for col_name in col_names:
-            if i in continuous_col_type_idxs:
-                dtypes_dict[col_name] = 'float'
-            else:
-                dtypes_dict[col_name] = 'string'
-            i += 1
-        self.data = self.data.astype(dtypes_dict)
         self.cat_data = self.data.select_dtypes("string")
         self.cont_data = self.data.select_dtypes("float")
 
@@ -157,9 +145,7 @@ class DataPreprocessor(FeatureSelector,
         self.concatenate_cat_cont_data()
         self.prepare_data_for_modelling()
 
-
     def label_missing_values(self):
         col_types = self.data.dtypes
         self.data = self.data.replace({'-9': np.nan, -9: np.nan})
         self.data = self.data.astype(col_types)
-
