@@ -1,42 +1,31 @@
 import configparser
 from src.utils import read_input_data, preprocessing
-from src.modelling import random_forrest_modelling
-import numpy as np
+from src.modelling import feature_selection, random_forrest_modelling
 
 def main():
     config = configparser.ConfigParser()
     config.read("config.yml")
-    data = read_input_data.get_data(
+    X_data, y_data = read_input_data.get_data(
         config["default"].get("heart_disease_data_dir"),
         ["switzerland.data",
          "long-beach-va.data",
          "hungarian.data"]
     )
-    data_preprocessor = preprocessing.DataPreprocessor(data, 0.01)
+    data_preprocessor = preprocessing.DataPreprocessor(X_data, y_data, 0.8, 8)
     data_preprocessor.preprocess_data()
     baseline_rf_model = random_forrest_modelling.train_random_forrests(
         data_preprocessor.X_data,
         data_preprocessor.y_data
     )
-    feature_importance_dict = random_forrest_modelling.random_forrest_feature_importances(
-        baseline_rf_model,
-        data_preprocessor.features
+    fit_params = {"col_na_proportion": data_preprocessor.col_na_proportion}
+    grid_search_cv_rf = feature_selection.feature_selection_grid_search(
+        data_preprocessor.X_data,
+        data_preprocessor.y_data,
+        fit_params
     )
-    selected_features = random_forrest_modelling.feature_importance_feature_selection(
-        feature_importance_dict,
-        50
-    )
-    X_data = random_forrest_modelling.filter_X_data_to_selected_features(
-        selected_features,
-        data_preprocessor.features,
-        data_preprocessor.X_data
-    )
-    baseline_rf_model = random_forrest_modelling.train_random_forrests(
-        X_data,
-        data_preprocessor.y_data
-    )
+    feature_selection.get_feature_selection_grid_search_results(grid_search_cv_rf)
     grid_search_cv_rf = random_forrest_modelling.random_forrest_grid_search(
-        X_data,
+        data_preprocessor.X_data,
         data_preprocessor.y_data
     )
     random_forrest_modelling.grid_search_cv_rf_results(grid_search_cv_rf)

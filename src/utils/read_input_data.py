@@ -17,7 +17,9 @@ def get_data(heart_disease_data_directory, file_names):
     all_data = pd.concat(data_list, axis=0)
     col_types = read_col_types("data/col_types.json")
     all_data = all_data.astype(col_types)
-    return all_data
+    X_data, y_data = assign_output_col(all_data)
+    y_data = recategorise_output_categories(y_data)
+    return X_data, y_data
 
 
 def get_col_names(heart_disease_data_directory,col_names_file_name):
@@ -63,3 +65,15 @@ def generate_data_frame(raw_data, col_names):
         rows.append(row)
     data = pd.DataFrame(rows, columns=col_names)
     return data
+
+
+def assign_output_col(data):
+    y_col_name = "58 num: diagnosis of heart disease (angiographic disease status)"
+    y_data = data[y_col_name]
+    X_data = data.drop(y_col_name, axis =1)
+    return X_data, y_data
+
+
+def recategorise_output_categories(y_data):
+    y_data = np.where(y_data == "0", 0, 1)
+    return y_data

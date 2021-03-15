@@ -45,7 +45,7 @@
 "44 ca: number of major vessels (0-3) colored by flourosopy": "float",
 "45 restckm: irrelevant": "string",
 "46 exerckm: irrelevant": "string",
-"47 restef: rest raidonuclid (sp?) ejection fraction": "string",
+"47 restef: rest raidonuclid (sp?) ejection fraction": "float",
 "48 restwm: rest wall (sp?) motion abnormality": "string",
 "49 exeref: exercise radinalid (sp?) ejection fraction": "string",
 "50 exerwm: exercise wall (sp?) motion ": "string",
@@ -72,7 +72,7 @@
 "71 lvx3: not used": "string",
 "72 lvx4: not used": "string",
 "73 lvf: not used": "string",
-"74 cathef: not used": "string",
-"75 junk: not u": "string",
+"74 cathef: not used": "float",
+"75 junk: not u": "float",
 "data_origin": "string"
 }

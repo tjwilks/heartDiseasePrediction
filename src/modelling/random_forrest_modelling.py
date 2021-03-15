@@ -3,8 +3,9 @@ from sklearn.ensemble import RandomForestClassifier
 import numpy as np
 import pandas as pd
 
+
 def train_random_forrests(X_data, y_data):
-    baseline_rf_model = RandomForestClassifier(n_estimators=200, max_features=5, max_leaf_nodes=25, n_jobs=-1, oob_score=True)
+    baseline_rf_model = RandomForestClassifier(n_estimators=200, max_features=8, max_leaf_nodes=25, n_jobs=-1, oob_score=True)
     baseline_rf_model.fit(X_data, y_data)
     out_of_bag_score = baseline_rf_model.oob_score_
     cross_validation_score = np.mean(cross_val_score(baseline_rf_model, X_data, y_data, cv=10))
@@ -29,25 +30,3 @@ def grid_search_cv_rf_results(grid_search_cv_rf):
     for scores, parameters in zip(grid_search_cv_results["mean_test_score"], grid_search_cv_results["params"]):
         print(scores, parameters)
 
-
-def random_forrest_feature_importances(model, features):
-    feature_importances = model.feature_importances_
-    importance_rank = 1
-    feature_importance_dict = {}
-    for feature_importance, feature in sorted(zip(feature_importances, features), reverse=True):
-        print(f"{str(importance_rank)}: {feature[2:]}: {np.round(float(feature_importance), 3)}")
-        feature_importance_dict[feature] = (importance_rank, feature_importance)
-        importance_rank += 1
-    return feature_importance_dict
-
-
-def feature_importance_feature_selection(feature_importance_dict, rank_filter):
-    selected_features = [feature for feature, rank_score in feature_importance_dict.items() if rank_score[0]<=rank_filter]
-    return selected_features
-
-
-def filter_X_data_to_selected_features(selected_features, features, X_data):
-    X_data_df = pd.DataFrame(X_data, columns=features)
-    X_data_df = X_data_df.loc[:, selected_features]
-    X_data = X_data_df.to_numpy()
-    return X_data

@@ -1,65 +1,37 @@
 import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import OneHotEncoder, normalize
+from sklearn.ensemble import RandomForestClassifier
 
-
-class FeatureSelector:
-
-    def __init__(self, data, missing_value_filter):
-        self.data = data
-        self.missing_value_filter = missing_value_filter
-
-    def drop_unessersary_cols(self):
-        # judged as unessersary by examination of column names
-        col_to_drop_idxs = [0, 1]
-        cols_to_drop = self.data.columns[col_to_drop_idxs]
-        self.data = self.data.drop(cols_to_drop, axis=1)
-        return self.data
-
-    def drop_cols_with_x_prop_missing_values(self):
-        self.data = self.data.replace({pd.NA: np.nan})
-        col_na_proportion = self.data.isnull().sum() / len(self.data)
-        col_na_proportion = col_na_proportion[col_na_proportion < self.missing_value_filter]
-        cols_to_keep = col_na_proportion.index
-        self.data = self.data.loc[:, cols_to_keep]
 
 
 class ColAssignor:
 
-    def __init__(self, data):
-        self.data = data
+    def __init__(self, X_data):
+        self.X_data = X_data
         self.cat_data = None
         self.cont_data = None
         self.y_data = None
 
     def assign_output_col(self):
         y_col_name = "58 num: diagnosis of heart disease (angiographic disease status)"
-        self.y_data = self.data[y_col_name]
-        self.data = self.data.drop(y_col_name, axis =1)
+        self.y_data = self.X_data[y_col_name]
+        self.X_data = self.X_data.drop(y_col_name, axis =1)
 
     def assign_col_types(self):
-        self.cat_data = self.data.select_dtypes("string")
-        self.cont_data = self.data.select_dtypes("float")
-
-
-class OutputTransformer:
-
-    def __init__(self, y_data):
-        self.y_data = y_data
-
-    def recategorise_output_categories(self):
-        self.y_data = np.where(self.y_data == "0", 0, 1)
+        self.cat_data = self.X_data.select_dtypes("string")
+        self.cont_data = self.X_data.select_dtypes("float")
 
 
 class CategoricalVariablePreprocessor:
 
-    def __init__(self, data):
-        self.data = data
+    def __init__(self, X_data):
+        self.X_data = X_data
         self.cat_data = None
 
     def impute_cat_missing_values(self):
-        self.cat_data = self.data.select_dtypes("string")
+        self.cat_data = self.X_data.select_dtypes("string")
         col_names = self.cat_data.columns
         self.cat_data = self.cat_data.replace({pd.NA: np.nan})
         most_frequent_imputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
@@ -76,12 +48,12 @@ class CategoricalVariablePreprocessor:
 
 class ContinuousVariablePreprocessor:
 
-    def __init__(self, data):
-        self.data = data
+    def __init__(self, X_data):
+        self.X_data = X_data
         self.cont_data = None
 
     def impute_cont_missing_values(self):
-        self.cont_data = self.data.select_dtypes("float")
+        self.cont_data = self.X_data.select_dtypes("float")
         self.cont_data = self.cont_data.replace({pd.NA: np.nan})
         col_names = self.cont_data.columns
         median_imputer = SimpleImputer(missing_values=np.nan, strategy='median')
@@ -89,11 +61,13 @@ class ContinuousVariablePreprocessor:
         self.cont_data = pd.DataFrame(self.cont_data, columns=col_names)
 
     def normalise_continuous_variables(self):
-        col_names = self.data.columns
+        col_names = self.cont_data.columns
         for col_name in col_names:
-            if self.data[col_name].dtype == "float":
-                self.data[col_name] = (self.data[col_name] - np.min(self.data[col_name])) / (
-                        np.max(self.data[col_name]) - np.min(self.data[col_name]))
+            col = self.cont_data.loc[:, col_name]
+            if np.max(col) - np.min(col) != 0:
+                min = np.min(col)
+                min_max_diff = np.max(col) - min
+                self.cont_data.loc[:, col_name] = (col - min) / min_max_diff
 
 
 class InputDataFormatting:
@@ -106,35 +80,33 @@ class InputDataFormatting:
         self.X_data = None
 
     def concatenate_cat_cont_data(self):
-        self.features_df = pd.concat([self.cat_data, self.cont_data], axis=1)
-        self.features = self.features_df.columns
-
-    def prepare_data_for_modelling(self):
-        self.X_data = self.features_df.to_numpy()
+        self.X_data = pd.concat([self.cat_data, self.cont_data], axis=1)
+        self.features = self.X_data.columns
 
 
-class DataPreprocessor(FeatureSelector,
-                       ColAssignor,
-                       OutputTransformer,
+class DataPreprocessor(ColAssignor,
                        CategoricalVariablePreprocessor,
                        ContinuousVariablePreprocessor,
                        InputDataFormatting):
 
-    def __init__(self, data, missing_value_filter):
-        self.data = data
+    def __init__(self, X_data, y_data, missing_value_filter, feature_importance_rank_filter):
+        self.X_data = X_data
+        self.y_data = y_data
         self.missing_value_filter = missing_value_filter
+        self.feature_importance_rank_filter = feature_importance_rank_filter
+        # self.col_na_proportion = None
 
     def preprocess_data(self):
 
         self.label_missing_values()
-        # col removal
+        self.caluculate_na_proportions()
+
+        self.remove_all_na_cols()
         self.drop_unessersary_cols()
-        self.drop_cols_with_x_prop_missing_values()
-        # col assignment
-        self.assign_output_col()
         self.assign_col_types()
-        # output transformation
-        self.recategorise_output_categories()
+
+        self.impute_cont_missing_values()
+        self.normalise_continuous_variables()
         # categorical variable preprocessing
         self.impute_cat_missing_values()
         self.one_hot_encode_cat_variables()
@@ -143,9 +115,38 @@ class DataPreprocessor(FeatureSelector,
         self.impute_cont_missing_values()
         # input data formatting
         self.concatenate_cat_cont_data()
-        self.prepare_data_for_modelling()
+
+    def drop_unessersary_cols(self):
+        # judged as unessersary by examination of column names
+        cols_to_drop = ['1 id: patient identification number',
+                        '2 ccf: social security number (I replaced this with a dummy value of 0)',
+                        '20 ekgmo (month of exercise ECG reading)',
+                        '21 ekgday(day of exercise ECG reading)',
+                        '22 ekgyr (year of exercise ECG reading)',
+                        '55 cmo: month of cardiac cath (sp?)  (perhaps "call")',
+                        '56 cday: day of cardiac cath (sp?)',
+                        '57 cyr: year of cardiac cath (sp?)']
+
+        self.X_data = self.X_data.drop(cols_to_drop, axis=1)
+        return self.X_data
 
     def label_missing_values(self):
-        col_types = self.data.dtypes
-        self.data = self.data.replace({'-9': np.nan, -9: np.nan})
-        self.data = self.data.astype(col_types)
+        col_types = self.X_data.dtypes
+        self.X_data = self.X_data.replace({'-9': np.nan, -9: np.nan})
+        self.X_data = self.X_data.astype(col_types)
+
+    def caluculate_na_proportions(self):
+        X_data_np_nan = self.X_data.replace({pd.NA: np.nan})
+        self.col_na_proportion = X_data_np_nan.isnull().sum() / len(X_data_np_nan)
+
+    def remove_all_na_cols(self):
+        all_na_cols = self.col_na_proportion[self.col_na_proportion >= 0.98]
+        all_na_cols = all_na_cols.index
+        self.X_data = self.X_data.drop(all_na_cols, axis=1)
+
+    def assign_col_types(self):
+        self.cat_data = self.X_data.select_dtypes("string")
+        self.cont_data = self.X_data.select_dtypes("float")
+
+
+
