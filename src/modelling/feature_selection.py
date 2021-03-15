@@ -1,23 +1,4 @@
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import GridSearchCV
-from src.modelling.preprocessing_estimator import CustomEstimator
-
-
-def feature_selection_grid_search(X_data, y_data, fit_params):
-    param_grid = {
-        "missing_value_filter": [0.5, 0.8],
-        "feature_importance_rank_filter": [8, 12, 17]
-    }
-    custom_estimator = CustomEstimator()
-    grid_search_cv_preprocess = GridSearchCV(custom_estimator, param_grid, cv=5)
-    grid_search_cv_preprocess.fit(X_data, y_data, fit_params=fit_params)
-    return grid_search_cv_preprocess
-
-
-def get_feature_selection_grid_search_results(grid_search_cv_preprocess):
-    grid_search_cv_results = grid_search_cv_preprocess.cv_results_
-    for scores, parameters in zip(grid_search_cv_results["mean_test_score"], grid_search_cv_results["params"]):
-        print(scores, parameters)
 
 
 def feature_selection(X_data,

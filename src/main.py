@@ -1,6 +1,6 @@
 import configparser
 from src.utils import read_input_data, preprocessing
-from src.modelling import feature_selection, random_forrest_modelling
+from src.modelling import total_grid_search
 
 def main():
     config = configparser.ConfigParser()
@@ -13,22 +13,19 @@ def main():
     )
     data_preprocessor = preprocessing.DataPreprocessor(X_data, y_data, 0.8, 8)
     data_preprocessor.preprocess_data()
-    baseline_rf_model = random_forrest_modelling.train_random_forrests(
-        data_preprocessor.X_data,
-        data_preprocessor.y_data
-    )
+
     fit_params = {"col_na_proportion": data_preprocessor.col_na_proportion}
-    grid_search_cv_rf = feature_selection.feature_selection_grid_search(
+    grid_search_cv_rf = total_grid_search.total_grid_search(
         data_preprocessor.X_data,
         data_preprocessor.y_data,
-        fit_params
+        missing_value_filter=[0.8, 0.9],
+        feature_importance_rank_filter=[10, 15],
+        max_leaf_nodes=[20, 30],
+        max_features=[5, 7],
+        n_estimators=[100],
+        fit_params=fit_params,
     )
-    feature_selection.get_feature_selection_grid_search_results(grid_search_cv_rf)
-    grid_search_cv_rf = random_forrest_modelling.random_forrest_grid_search(
-        data_preprocessor.X_data,
-        data_preprocessor.y_data
-    )
-    random_forrest_modelling.grid_search_cv_rf_results(grid_search_cv_rf)
+    total_grid_search.get_grid_search_results(grid_search_cv_rf)
 
 if __name__ == "__main__":
     main()
