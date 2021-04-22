@@ -44,7 +44,10 @@ class HypParamSearch:
 def get_grid_search_results(grid_search_cv_preprocess):
     grid_search_cv_results = grid_search_cv_preprocess.cv_results_
     for scores, parameters in zip(grid_search_cv_results["mean_test_score"], grid_search_cv_results["params"]):
-        print(scores, parameters)
+        print(f"Cross-val error: {np.round(scores, 5)} --- Parameters: {parameters}")
+    print("-------------------------")
+    print(f"Best score found: {np.round(grid_search_cv_preprocess.best_score_, 5)}")
+    print(f"Best hyperparameter configuration found: {grid_search_cv_preprocess.best_params_}")
 
 
 class TotalEstimator(BaseEstimator):
