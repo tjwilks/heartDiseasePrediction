@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import OneHotEncoder, normalize
-from sklearn.ensemble import RandomForestClassifier
-
+from sklearn.preprocessing import OneHotEncoder
 
 
 class ColAssignor:
@@ -89,12 +87,9 @@ class DataPreprocessor(ColAssignor,
                        ContinuousVariablePreprocessor,
                        InputDataFormatting):
 
-    def __init__(self, X_data, y_data, missing_value_filter, feature_importance_rank_filter):
+    def __init__(self, X_data, y_data):
         self.X_data = X_data
         self.y_data = y_data
-        self.missing_value_filter = missing_value_filter
-        self.feature_importance_rank_filter = feature_importance_rank_filter
-        # self.col_na_proportion = None
 
     def preprocess_data(self):
 
