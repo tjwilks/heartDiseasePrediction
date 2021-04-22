@@ -1,0 +1,13 @@
+[read_input_data_config]
+heart_disease_data_dir = /Users/toby/data/heart_disease_files/input_data
+col_names_file_path = /Users/toby/repos/heartDiseasePrediction/config/col_names.txt
+col_types_file_path = /Users/toby/repos/heartDiseasePrediction/config/col_types.json
+
+[grid_search_config]
+param_grid_config_path = /Users/toby/repos/heartDiseasePrediction/config/grid_search_param_grid.json
+k_folds = 2
+
+[bayes_opt_search_config]
+param_grid_config_path = /Users/toby/repos/heartDiseasePrediction/config/bayes_opt_search_param_grid.json
+k_folds = 5
+iterations = 30
