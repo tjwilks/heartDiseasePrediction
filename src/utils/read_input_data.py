@@ -6,6 +6,18 @@ import json
 
 
 def get_data(read_input_data_config):
+    """
+        function for loading data
+
+        Parameters
+        ----------
+        read_input_data_config: configparser.SectionProxy
+            configparser.SectionProxy generated from config.yml file
+            specifying directory containing raw data files: heart_disease_data_dir
+            data column names file path: col_names_file_path
+            and file specifying data column types: col_types_file_path
+    """
+
     col_names = get_col_names(read_input_data_config["col_names_file_path"])
     file_names = os.listdir(read_input_data_config["heart_disease_data_dir"])
     data_list = []
@@ -18,12 +30,19 @@ def get_data(read_input_data_config):
     all_data = pd.concat(data_list, axis=0)
     col_types = read_json_to_dict(read_input_data_config["col_types_file_path"])
     all_data = all_data.astype(col_types)
-    X_data, y_data = assign_output_col(all_data)
-    y_data = recategorise_output_categories(y_data)
-    return X_data, y_data
+    return all_data
 
 
 def get_col_names(col_names_file_path):
+    """
+        function for reading in data column names
+
+        Parameters
+        ----------
+        col_names_file_path: str
+            file path for txt file specifying column names
+
+    """
     with open(col_names_file_path, "rb") as file:
         lines = file.readlines()
     col_names = [str(line)[2:-5] for line in lines]
@@ -31,6 +50,18 @@ def get_col_names(col_names_file_path):
 
 
 def read_raw_data(heart_disease_data_directory, file_name):
+    """
+        function for reading raw data files
+
+        Parameters
+        ----------
+        heart_disease_data_directory: str
+            file path for txt file specifying column names
+
+        file_name: str
+            name of data file within heart_disease_data_directory
+            to be read in as part of input data
+    """
     file_path = os.path.join(heart_disease_data_directory, file_name)
     with open(file_path, "rb") as file:
         raw_data = file.read()
@@ -39,6 +70,16 @@ def read_raw_data(heart_disease_data_directory, file_name):
 
 
 def process_raw_data(raw_data):
+    """
+        function for processing raw data stored as string into
+        list of strings where each string in list represents
+        a row of data
+
+        Parameters
+        ----------
+        raw_data: str
+            raw data to be processed
+    """
     raw_data = str(raw_data)
     raw_data = raw_data.replace("b'", "")
     raw_data = raw_data.replace(". ", "")
@@ -50,13 +91,37 @@ def process_raw_data(raw_data):
     return raw_data
 
 
-def read_json_to_dict(col_types_json_file_path):
-    with open(col_types_json_file_path, 'r') as j:
-        col_types = json.loads(j.read())
-    return col_types
+def read_json_to_dict(json_file_path):
+    """
+        function for reading in json files as dictionary
+
+        Parameters
+        ----------
+        json_file_path: str
+            file path for json file to be read in and converted to
+            dictionary
+    """
+    with open(json_file_path, 'r') as j:
+        json_as_dictionary = json.loads(j.read())
+    return json_as_dictionary
 
 
 def generate_data_frame(raw_data, col_names):
+    """
+        function for converting raw data as list of strings
+        where each string in list represents a row of data into
+        a pandas dataframe
+
+        Parameters
+        ----------
+        raw_data: list
+            list of strings where each string in list represents
+            a row of data
+
+        col_names: list
+            list of strings where each string in list represents
+            a row of data
+    """
     rows = []
     for row in raw_data:
         row = row.rstrip(" ")
@@ -65,15 +130,3 @@ def generate_data_frame(raw_data, col_names):
         rows.append(row)
     data = pd.DataFrame(rows, columns=col_names)
     return data
-
-
-def assign_output_col(data):
-    y_col_name = "58 num: diagnosis of heart disease (angiographic disease status)"
-    y_data = data[y_col_name]
-    X_data = data.drop(y_col_name, axis =1)
-    return X_data, y_data
-
-
-def recategorise_output_categories(y_data):
-    y_data = np.where(y_data == "0", 0, 1)
-    return y_data

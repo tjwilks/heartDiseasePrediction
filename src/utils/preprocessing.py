@@ -96,6 +96,13 @@ class DataPreprocessor(CategoricalVariablePreprocessor,
 
         Methods
         -------
+        assign_output_col
+            select column to be assigned as output column that is to be
+            predicted
+
+        recategorise_output_categories_to_binary
+            convert multi-variable output to binary-variable
+
         label_missing_values
             label inputted value as a np.nan
 
@@ -115,12 +122,14 @@ class DataPreprocessor(CategoricalVariablePreprocessor,
             or float is continuous
         """
 
-    def __init__(self, X_data, y_data):
-        self.X_data = X_data
-        self.y_data = y_data
+    def __init__(self, all_data):
+        self.all_data = all_data
 
     def preprocess_data(self):
+
         # generic preprocessing functions
+        self.assign_output_col("58 num: diagnosis of heart disease (angiographic disease status)")
+        self.recategorise_output_categories_to_binary("0")
         self.label_missing_values("-9")
         self.label_missing_values(-9)
         self.label_missing_values(pd.NA)
@@ -139,6 +148,34 @@ class DataPreprocessor(CategoricalVariablePreprocessor,
 
         # input data formatting
         self.concatenate_cat_cont_data()
+
+    def assign_output_col(self, y_col_name):
+        """
+            function for setting
+
+            Parameters
+            ----------
+            raw_data: list
+                list of strings where each string in list represents
+                a row of data
+
+            col_names: list
+                list of strings where each string in list represents
+                a row of data
+        """
+
+        self.y_data = self.all_data[y_col_name]
+        self.X_data = self.all_data.drop(y_col_name, axis=1)
+
+    def recategorise_output_categories_to_binary(self, zero_categories):
+        """
+        Parameters
+        ----------
+        zero_categories : str, int or float
+            output values to set as 0 with other values set as 1
+        """
+        zero_categories = list(zero_categories)
+        self.y_data = np.where(self.y_data.isin(zero_categories), 0, 1)
 
     def label_missing_values(self, value_to_label):
         """
