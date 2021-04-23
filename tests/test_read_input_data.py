@@ -1,11 +1,10 @@
-import unittest
 from src.utils import read_input_data
 import configparser
 import pytest
 import os
 
 
-class TestReadInputData(unittest.TestCase):
+class TestReadInputData:
     """
         a class for testing the read input data module
 
@@ -32,7 +31,6 @@ class TestReadInputData(unittest.TestCase):
         test_n_rows:
             tests number of rows is not 0 and greater than number of columns
     """
-
 
     @pytest.fixture(autouse=True)
     def setup_test(self):
