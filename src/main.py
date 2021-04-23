@@ -9,12 +9,12 @@ def main():
     config.read("config/config.yml")
 
     # read in input data
-    X_data, y_data = read_input_data.get_data(
+    all_data = read_input_data.get_data(
         config["read_input_data_config"]
     )
 
     # preprocess input data
-    data_preprocessor = preprocessing.DataPreprocessor(X_data, y_data)
+    data_preprocessor = preprocessing.DataPreprocessor(all_data)
     data_preprocessor.preprocess_data()
 
     # run hyperparameter search
