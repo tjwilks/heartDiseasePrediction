@@ -3,7 +3,7 @@ from src.utils.preprocessing import DataPreprocessor
 from src.modelling.feature_selection import FeatureSelector
 import configparser
 import pytest
-
+import re
 
 class TestFeatureSelection:
     """
@@ -20,9 +20,9 @@ class TestFeatureSelection:
         test_cols_dropped_by_feature_importance_rank:
             tests select_on_feature_importance_rank removes columns
 
-        test_cols_higher_na_prop_above_removed:
-            tests columns remaining are equals to columns bellow
-            missing_value_filter in col_na_proportion dict
+        test_no_cols_after_na_selection_above_threshold:
+            tests columns remaining after missing value feature selection
+            applied have na proportion above threshold
 
     """
 
@@ -52,13 +52,18 @@ class TestFeatureSelection:
         n_cols_after = self.feature_selector.X_data.shape[1]
         assert n_cols_before > n_cols_after
 
-    def test_cols_higher_na_prop_above_removed(self):
+    def test_no_cols_after_na_selection_above_threshold(self):
         self.feature_selector.select_on_missing_value_proportion()
         columns_remaining = self.feature_selector.X_data.columns
+        original_columns_remaining_one_hot = [re.split(r"_[^_]{0,20}_one_hot", col)[0] for col in columns_remaining
+                                              if bool(re.search(r"_[^_]{0,20}_one_hot", col))]
+        columns_remaining_non_one_hot = [col for col in columns_remaining
+                                         if bool(re.search(r"_[^_]{0,20}_one_hot", col)) == False]
+        original_columns_remaining = set(original_columns_remaining_one_hot).union(set(columns_remaining_non_one_hot))
+
         cols_na_prop_bellow = self.feature_selector.col_na_proportion[self.feature_selector.col_na_proportion <=
                                                                       self.feature_selector.missing_value_filter]
         cols_na_prop_bellow = cols_na_prop_bellow.index
-        na_bellow_not_remaining = set(cols_na_prop_bellow) - set(columns_remaining)
+        na_bellow_not_remaining = set(original_columns_remaining) - set(cols_na_prop_bellow)
         n_cols_na_bellow_not_remaining = len(na_bellow_not_remaining)
         assert n_cols_na_bellow_not_remaining == 0
-
