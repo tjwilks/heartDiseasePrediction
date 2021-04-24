@@ -33,7 +33,7 @@ class CategoricalVariablePreprocessor:
         self.cat_data = most_frequent_imputer.fit_transform(self.cat_data.to_numpy())
         self.cat_data = pd.DataFrame(self.cat_data, columns=col_names)
 
-    def one_hot_encode_cat_variables(self):
+    def one_hot_encode_multinomial_variables(self):
         unique_vals_in_cat_data = self.cat_data.nunique()
         multinomial_vars_names = unique_vals_in_cat_data[unique_vals_in_cat_data > 2].index
         multinomial_vars = self.cat_data.loc[:, multinomial_vars_names]
@@ -45,6 +45,14 @@ class CategoricalVariablePreprocessor:
         multinomial_vars_one_hot = multinomial_vars_one_hot.toarray()
         multinomial_vars_one_hot_df = pd.DataFrame(multinomial_vars_one_hot, columns=one_hot_features)
         self.cat_data = pd.concat([multinomial_vars_one_hot_df, binomial_vars], axis=1)
+
+    def scale_binomial_variables(self):
+        unique_vals_in_cat_data = self.cat_data.nunique()
+        binomial_vars_names = unique_vals_in_cat_data[unique_vals_in_cat_data == 2].index
+        for bin_var_name in binomial_vars_names:
+            bin_var = self.cat_data.loc[:, bin_var_name]
+            bin_var_val_0 = bin_var.unique()[0]
+            self.cat_data.loc[:, bin_var_name] = np.where(bin_var==bin_var_val_0, 0, 1)
 
 
 class ContinuousVariablePreprocessor:
@@ -123,9 +131,9 @@ class DataPreprocessor(CategoricalVariablePreprocessor,
         drop_unnecessary_cols
             drop specific columns
 
-        assign_col_types
-            assign columns types as either string if categorical
-            or float is continuous
+        assign_cat_and_cont_data
+            assign data as cont_data if columns are float type
+            and cat data if sting type
         """
 
     def __init__(self, all_data):
@@ -142,11 +150,12 @@ class DataPreprocessor(CategoricalVariablePreprocessor,
         self.calculate_na_proportions()
         self.remove_all_na_cols()
         self.drop_unessersary_cols()
-        self.assign_col_types()
+        self.assign_cat_and_cont_data()
 
         # categorical variable preprocessing
         self.impute_cat_missing_values()
-        self.one_hot_encode_cat_variables()
+        self.one_hot_encode_multinomial_variables()
+        self.scale_binomial_variables()
 
         # continuous variable preprocessing
         self.normalise_cont_data()
@@ -157,17 +166,10 @@ class DataPreprocessor(CategoricalVariablePreprocessor,
 
     def assign_output_col(self, y_col_name):
         """
-            function for setting
-
-            Parameters
-            ----------
-            raw_data: list
-                list of strings where each string in list represents
-                a row of data
-
-            col_names: list
-                list of strings where each string in list represents
-                a row of data
+        Parameters
+        ----------
+        y_col_name: list
+            column name to be assigned as output col
         """
 
         self.y_data = self.all_data[y_col_name]
@@ -216,7 +218,7 @@ class DataPreprocessor(CategoricalVariablePreprocessor,
         self.X_data = self.X_data.drop(cols_to_drop, axis=1)
         return self.X_data
 
-    def assign_col_types(self):
+    def assign_cat_and_cont_data(self):
         self.cat_data = self.X_data.select_dtypes("string")
         self.cont_data = self.X_data.select_dtypes("float")
 
