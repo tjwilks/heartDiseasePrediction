@@ -34,11 +34,16 @@ class CategoricalVariablePreprocessor:
         self.cat_data = pd.DataFrame(self.cat_data, columns=col_names)
 
     def one_hot_encode_cat_variables(self):
+        unique_vals_in_cat_data = self.cat_data.nunique()
+        multinomial_vars_names = unique_vals_in_cat_data[unique_vals_in_cat_data > 2].index
+        multinomial_vars = self.cat_data.loc[:, multinomial_vars_names]
+        binomial_vars = self.cat_data.drop(multinomial_vars_names, axis=1)
         one_hot_encoder = OneHotEncoder()
-        cat_data_one_hot = one_hot_encoder.fit_transform(self.cat_data)
-        one_hot_features = one_hot_encoder.get_feature_names(list(self.cat_data.columns))
-        cat_data_one_hot = cat_data_one_hot.toarray()
-        self.cat_data = pd.DataFrame(cat_data_one_hot, columns=one_hot_features)
+        multinomial_vars_one_hot = one_hot_encoder.fit_transform(multinomial_vars)
+        one_hot_features = one_hot_encoder.get_feature_names(list(multinomial_vars_names))
+        multinomial_vars_one_hot = multinomial_vars_one_hot.toarray()
+        multinomial_vars_one_hot_df = pd.DataFrame(multinomial_vars_one_hot, columns=one_hot_features)
+        self.cat_data = pd.concat([multinomial_vars_one_hot_df, binomial_vars], axis=1)
 
 
 class ContinuousVariablePreprocessor:
