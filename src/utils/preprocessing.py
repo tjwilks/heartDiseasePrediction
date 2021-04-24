@@ -41,6 +41,7 @@ class CategoricalVariablePreprocessor:
         one_hot_encoder = OneHotEncoder()
         multinomial_vars_one_hot = one_hot_encoder.fit_transform(multinomial_vars)
         one_hot_features = one_hot_encoder.get_feature_names(list(multinomial_vars_names))
+        one_hot_features = [f"{feature}_one_hot" for feature in one_hot_features]
         multinomial_vars_one_hot = multinomial_vars_one_hot.toarray()
         multinomial_vars_one_hot_df = pd.DataFrame(multinomial_vars_one_hot, columns=one_hot_features)
         self.cat_data = pd.concat([multinomial_vars_one_hot_df, binomial_vars], axis=1)

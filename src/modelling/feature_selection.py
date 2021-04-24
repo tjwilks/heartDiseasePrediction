@@ -1,5 +1,5 @@
 from sklearn.ensemble import RandomForestClassifier
-
+import re
 
 class FeatureSelector:
     """
@@ -54,8 +54,12 @@ class FeatureSelector:
     def select_on_missing_value_proportion(self):
         cols_na_proportion_above_filter = self.col_na_proportion[self.col_na_proportion > self.missing_value_filter]
         cols_with_x_prop_missing_values = cols_na_proportion_above_filter.index
-        cols_to_drop = set(cols_with_x_prop_missing_values).intersection(set(self.X_data.columns))
-        self.X_data = self.X_data.drop(cols_to_drop, axis=1)
+        one_hot_cols = [col for col in self.X_data.columns if bool(re.search("_one_hot", col))]
+        non_one_hot_cols = [col for col in self.X_data.columns if bool(re.search("_one_hot", col)) is False]
+        cols_to_drop_one_hot = [col for col in one_hot_cols if re.split(r"_[^_]{0,20}_one_hot", col)[0] in cols_with_x_prop_missing_values]
+        cols_to_drop_normal = [col for col in non_one_hot_cols if col in cols_with_x_prop_missing_values]
+        cols_to_drop_total = list(set(cols_to_drop_normal).union(set(cols_to_drop_one_hot)))
+        self.X_data = self.X_data.drop(cols_to_drop_total, axis=1)
 
     def select_on_feature_importance_rank(self):
         model = RandomForestClassifier(n_estimators=200, max_features=5, max_leaf_nodes=25, n_jobs=-1, oob_score=True)
